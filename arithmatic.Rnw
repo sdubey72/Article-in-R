@@ -1,0 +1,94 @@
+\documentclass{article}
+
+\begin{document}
+
+\title{Arithematic}
+\author{Shraddha Dubey}
+\maketitle
+
+\begin{abstract}
+This artice is created using Swever in R Studio
+\end{abstract}
+
+\section{Addition}
+\noindent Addition in R is done with + sign. Firstly lets strore some values into variables.
+
+<<>>=
+x<-4
+y<-5
+
+x+y
+
+@
+
+\section{Substraction}
+Substraction is done using - sign. Here is an example
+
+<<>>=
+x<-4
+y<-5
+
+x-y
+@
+
+\section{Multiplication}
+\noindent Multiplication is done with help of *(astrisk) sign.
+
+<<>>=
+x<-4
+y<-5
+
+x*y
+@
+
+
+\section{Division}
+\noindent Division is done using / to get the quotient.
+
+\noindent normal division
+<<>>=
+x<-4
+y<-5
+
+x/y
+@
+
+\section{Plotting}
+
+\textit{Now lets try to plot something}
+
+<<>>=
+z<-seq(1,10,.1)
+@
+
+\noindent This generate a sequence of numbers with intervel of 0.1 from 1 to 10.
+<<echo=z>>=
+z
+@
+
+\noindent Lets add more code:
+<<>>=
+y<-z^2
+@
+
+\noindent This will square all the values of z.
+<<>>=
+z
+@
+
+\noindent We can also add dataframe
+<<>>=
+df<-data.frame(z,y)
+df
+@
+\noindent Finally we can use ggplot to a plot. dont forget to add library.\footnote{This is the tricky part}
+
+<<warning=FALSE>>=
+library(ggplot2)
+ggplot()+
+  geom_point(data=df,aes(x=z,y=y))
+
+@
+
+
+\end{document}

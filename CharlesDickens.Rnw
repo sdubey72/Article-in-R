@@ -1,0 +1,165 @@
+
+\documentclass[12pt, letterpaper, twoside]{article}
+\usepackage{natbib}
+
+\let\nofiles\relax
+
+\title {\textbf{\emph{Working with Wordcloud}}}
+\author{Shraddha Dubey}
+\date{November 2017}
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+\noindent Lets start working with Wordcloud and we need some words to create a wordcloud. I picked up one of the novels of Charles Dickens - Tale of Two Cities. The book is available to download from gutenbergr package.
+
+\end{center}
+
+\section{Libraries}
+\noindent Install and bring the following libraries to your workspace.
+
+\begin{itemize}
+\item
+\textbf{gutenbergr} :  The gutenbergr package helps you download and process public domain works from the Project Gutenberg collection.
+
+Metadata for all Project Gutenberg works as R datasets, so that they can be searched and filtered.\citep{cranorg}
+\begin{itemize}
+\item
+\textbf{gutenberg\_download()} :downloads one or more works from Project Gutenberg by ID  e.g., gutenberg\_download(84) downloads the text of Frankenstein.
+\item
+\textbf{gutenberg\_metadata} :  contains information about each work, pairing Gutenberg ID with title, author, language, etc
+\item
+textbf{gutenberg\_authors} : contains information about each author, such as aliases and birth/death year
+\item
+\textbf{gutenberg\_subjects}: contains pairings of works with Library of Congress subjects and topics
+\end{itemize}
+
+\item
+\textbf{dplyr} :The dplyr package helps with data manipulation challenges.
+
+It provides simple "verbs", functions that correspond to the most common data manipulation tasks.It uses efficient backends, so we spend less time waiting for the computer.
+
+\begin{itemize}
+\item \emph{Dplyr} has following function for basic data manipulation:
+\item \emph{filter()} to select cases based on their values.
+\item \emph{arrange()} to reorder the cases.
+\item \emph{select()} and \emph{rename()} to select variables based on their names.
+\item \emph{mutate()} and \emph{transmute()} to add new variables that are functions of existing variables.
+\item \emph{summarise()} to condense multiple values to a single value.
+\item \emph{sample\_n()} and \emph{sample\_frac()} to take random samples.
+\end{itemize}
+
+
+\item
+\emph{tidytext} : Its used for Text mining and sentiment analysis along with other tools like dplye and ggplot2
+
+\item
+\emph{wordcloud} : A wordcloud is handy tool to highlight the most commonly cited words in a text using a quick visualization.
+
+\end{itemize}
+
+<<warning=FALSE,message=FALSE>>=
+
+# download all the below mentioned packages first 
+#using the following command 
+#install.packages("package_name")
+# install.packages("gutenbergr")
+library(gutenbergr)
+# install.packages("dplyr")
+library(dplyr)
+# install.packages("knitr")
+library(knitr)
+# install.packages("tidytext")
+library(tidytext)
+# install.packages("wordcloud")
+library(wordcloud)
+library(wordcloud2)
+# install.packages("ggplot2")
+library(ggplot2)
+
+@
+
+\section{Download book}
+\noindent The first step towards making a wordcloud is getting text data. We are downloading 'A Tale of Two Cities' from gutenberg\_works
+
+<<warning=FALSE,message=FALSE>>=
+
+gutenberg_works(title=='A Tale of Two Cities')
+
+# we can used the gutenberg_id to download
+# the book into a dataframe
+
+two_cities<-gutenberg_download(98)
+two_cities[1:10,]
+
+@
+
+\section{Unnest the words}
+\noindent As you can notice in the above section, the text column holds each sentence of the novel. 
+
+\noindent Lets break it down into words using dplyr\footnote{ ref at https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html } function \emph{unnest\_tokens()}.
+
+\noindent unnest\_tokens() takes two parameters, first is the name of the resultant column and second is the name of source column which we want to unnest.
+
+
+<<>>=
+# break the lines into words and store into dataframe as two_cities
+two_cities<-two_cities%>%
+  unnest_tokens(word,text)
+
+two_cities[1:20,]
+@
+
+\section{Sentiment Analysis}
+\noindent Now that we have all the words from the novel, lets evaluate the sentiments of those words. 
+
+\noindent For that we can import a sentiment lexicon 'nrc' from tidytext package \footnote{ more details at https://cran.r-project.org/web/packages/tidytext/vignettes/tidytext.html}
+
+
+<<>>=
+
+two_cities$gutenberg_id<-NULL
+
+# store all the sentiments into sent dataframe
+sent<-get_sentiments('nrc')
+
+# inner join of sent dataframe with two_cities 
+# will give us the respective sentiments for each word
+
+two_cities<-inner_join(two_cities,sent)
+two_cities[1:10,]
+
+@
+
+\section{Plotting}
+
+\noindent We have all the sentiments and words so lets plot the graph for the sentiments used in the novel using \emph{ggplot2}.
+
+<<warning=FALSE,message=FALSE>>=
+# group the words by the sentiments
+
+two_cities<-two_cities%>%
+  group_by(word)%>%
+  summarize(freq=n(),sentiment=first(sentiment))
+two_cities[1:10,]
+
+# plotting graph
+ggplot()+
+  geom_bar(data=two_cities,aes(x=sentiment,y=freq)
+           ,stat = 'identity',fill='red')
+
+@
+
+\section{wordcloud}
+
+<<>>=
+wordcloud(two_cities$word,two_cities$freq,min.freq =50,
+          colors = brewer.pal(6,'Dark2'),vfont=c("script","bold"))
+
+@
+
+\bibliography{CharlesDickens}
+\nocite{*}
+\end{document}
